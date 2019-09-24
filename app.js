@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const apiRouter = require('./routes/api-router');
-const { handle404s, handle500s } = require('./errors/index');
+const { handleCustomErrors, handle404s, handle500s } = require('./errors/index');
 
 app.use('/api', apiRouter);
+
+app.use(handleCustomErrors);
 
 app.all('/*', handle404s);
 

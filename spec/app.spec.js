@@ -63,6 +63,14 @@ describe('/api', () => {
               });
             });
         });
+        it('status 404: valid username, does not exist', () => {
+          return request(app)
+            .get('/api/users/thisisnotausername')
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Not a valid username!');
+            });
+        });
       });
     });
   });
