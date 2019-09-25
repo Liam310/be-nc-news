@@ -1,0 +1,2 @@
+You are now connected to database "nc_news_test" as user "liam".
+UPDATE 1
