@@ -1,6 +1,9 @@
 process.env.NODE_ENV = 'test';
 
-const { expect } = require('chai');
+const chai = require('chai');
+const { expect } = chai;
+const chaiSorted = require('chai-sorted');
+chai.use(chaiSorted);
 const app = require('../app');
 const request = require('supertest');
 const connection = require('../db/connection');
@@ -89,6 +92,43 @@ describe('/api', () => {
     });
   });
   describe('/articles', () => {
+    describe.only('GET', () => {
+      it('status 200: responds with an array of articles', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.an('array');
+            expect(articles.length).to.equal(12);
+            expect(articles[0]).to.have.keys(
+              'author',
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes',
+              'comment_count'
+            );
+          });
+      });
+      it('status 200: default sorts by created_at key in ascending order', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.descendingBy('created_at');
+          });
+      });
+      it('status 200: sorts by specified sort_by query', () => {
+        return request(app)
+          .get('/api/articles/?sort_by=author')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.descendingBy('author');
+          });
+      });
+    });
     describe('/:article_id', () => {
       describe('GET', () => {
         it('status 200: responds with an article object containing all keys including a comment_count with the right value', () => {
@@ -126,7 +166,7 @@ describe('/api', () => {
             });
         });
       });
-      describe.only('PATCH', () => {
+      describe('PATCH', () => {
         it('status 200: update vote count and respond with updated article', () => {
           return request(app)
             .patch('/api/articles/1')
@@ -161,9 +201,27 @@ describe('/api', () => {
               expect(msg).to.equal('Bad request!');
             });
         });
+        it('status 400: invalid data type for inc_votes', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 'yeet' })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Bad request!');
+            });
+        });
+        it('status 400: request body does not contain inc_votes key', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ ink_vetos: 7 })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('No inc_votes property provided!');
+            });
+        });
       });
       describe('INVALID METHOD', () => {
-        it('status 405: responds with a message when sent a put, patch, post, or delete', () => {
+        it('status 405: responds with a message when sent a put, post, or delete', () => {
           const invalidMethods = ['put', 'post', 'delete'];
           const methodPromises = invalidMethods.map(method => {
             return request(app)
@@ -174,6 +232,96 @@ describe('/api', () => {
               });
           });
           return Promise.all(methodPromises);
+        });
+      });
+      describe('/comments', () => {
+        describe('POST', () => {
+          it('status 200: posts a comment and responds with posted comment', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({
+                username: 'butter_bridge',
+                body: "This Mitch guy really knows what's up."
+              })
+              .expect(200)
+              .then(({ body: { comment } }) => {
+                expect(comment).to.contain.keys(
+                  'comment_id',
+                  'author',
+                  'article_id',
+                  'votes',
+                  'created_at',
+                  'body'
+                );
+                expect(comment.username).to.equal();
+              });
+          });
+          it('status 400: given input is missing a body', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ username: 'butter_bridge' })
+              .expect(400)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Bad request!');
+              });
+          });
+          it('status 400: given input is missing a username', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ body: 'this is a comment' })
+              .expect(400)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Bad request!');
+              });
+          });
+          it('status 400: article_id is of invalid type', () => {
+            return request(app)
+              .post('/api/articles/yes/comments')
+              .send({ username: 'butter_bridge', body: 'this is a comment' })
+              .expect(400)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Bad request!');
+              });
+          });
+          it('status 422: article_id is not present in articles table', () => {
+            return request(app)
+              .post('/api/articles/1001/comments')
+              .send({
+                username: 'butter_bridge',
+                body: "This Mitch guy really knows what's up."
+              })
+              .expect(422)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Unprocessable entity!');
+              });
+          });
+          it('status 422: username is not present in users table', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({
+                username: 'yeet',
+                body: "This Mitch guy really knows what's up."
+              })
+              .expect(422)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Unprocessable entity!');
+              });
+          });
+        });
+        describe('INVALID METHODS', () => {
+          it('status 405: responds with a message when sent a put, patch, or delete', () => {
+            const invalidMethods = ['put', 'patch', 'delete'];
+            const methodPromises = invalidMethods.map(method => {
+              return request(app)
+                [method]('/api/articles/2/comments')
+                .send({ username: 'butter_bridge', body: 'this is a comment' })
+                .expect(405)
+                .then(({ body: { msg } }) => {
+                  expect(msg).to.equal('Method not allowed!');
+                });
+            });
+            return Promise.all(methodPromises);
+          });
         });
       });
     });

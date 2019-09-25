@@ -1,5 +1,7 @@
 \c nc_news_test
 
 
-UPDATE articles SET votes = votes + 9
-WHERE articles.article_id = 1
+INSERT INTO comments (author, article_id, votes, body)
+VALUES ('butter_bridge', 1, 0, 'yasssssss Queen');
+
+SELECT * FROM comments;
