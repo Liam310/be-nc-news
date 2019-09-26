@@ -1,6 +1,6 @@
 const connection = require('../db/connection');
 
-exports.insertComment = ({ username, body }, { article_id }) => {
+exports.insertComment = (username, body, article_id) => {
   return connection
     .insert({ author: username, article_id, body })
     .into('comments')
@@ -50,5 +50,15 @@ exports.modifyComment = (comment_id, inc_votes) => {
           msg: 'No inc_votes property provided!'
         });
       } else return article;
+    });
+};
+
+exports.destroyComment = comment_id => {
+  return connection('comments')
+    .where('comment_id', '=', comment_id)
+    .del()
+    .then(deleteCount => {
+      if (deleteCount < 1)
+        return Promise.reject({ status: 404, msg: 'Non-existent id!' });
     });
 };

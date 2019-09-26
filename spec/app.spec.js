@@ -433,20 +433,20 @@ describe('/api', () => {
                 expect(msg).to.equal('Bad request!');
               });
           });
-          it('status 404: no such article_id exists', () => {
-            return request(app)
-              .get('/api/articles/100000/comments')
-              .expect(404)
-              .then(({ body: { msg } }) => {
-                expect(msg).to.equal('Article not found!');
-              });
-          });
           it('status 400: invalid format for article_id', () => {
             return request(app)
               .get('/api/articles/yeet/comments')
               .expect(400)
               .then(({ body: { msg } }) => {
                 expect(msg).to.equal('Bad request!');
+              });
+          });
+          it('status 404: no such article_id exists', () => {
+            return request(app)
+              .get('/api/articles/100000/comments')
+              .expect(404)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Article not found!');
               });
           });
         });
@@ -482,7 +482,7 @@ describe('/api', () => {
       });
     });
   });
-  describe.only('/comments', () => {
+  describe('/comments', () => {
     describe('/:comment_id', () => {
       describe('PATCH', () => {
         it('status 200: responds with updated comment', () => {
@@ -534,6 +534,29 @@ describe('/api', () => {
             .expect(400)
             .then(({ body: { msg } }) => {
               expect(msg).to.equal('No inc_votes property provided!');
+            });
+        });
+      });
+      describe('DELETE', () => {
+        it('status 204: deletes comment; no content', () => {
+          return request(app)
+            .delete('/api/comments/1')
+            .expect(204);
+        });
+        it('status 400: invalid type of comment_id', () => {
+          return request(app)
+            .delete('/api/comments/yeet')
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Bad request!');
+            });
+        });
+        it('status 404: valid type but non-existent id', () => {
+          return request(app)
+            .delete('/api/comments/1701')
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Non-existent id!');
             });
         });
       });
