@@ -491,7 +491,7 @@ describe('/api', () => {
             .send({ inc_votes: 3 })
             .expect(200)
             .then(({ body: { comment } }) => {
-              expect(comment[0]).to.contain.keys(
+              expect(comment).to.contain.keys(
                 'author',
                 'comment_id',
                 'article_id',
@@ -499,8 +499,56 @@ describe('/api', () => {
                 'created_at',
                 'votes'
               );
-              expect(comment[0].votes).to.equal(19);
+              expect(comment.votes).to.equal(19);
             });
+        });
+        it('status 404: valid id, does not exist', () => {
+          return request(app)
+            .patch('/api/comments/1701')
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Non-existent id!');
+            });
+        });
+        it('status 400: invalid id', () => {
+          return request(app)
+            .patch('/api/comments/nonsense')
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Bad request!');
+            });
+        });
+        it('status 400: invalid data type for inc_votes', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({ inc_votes: 'yeet' })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Bad request!');
+            });
+        });
+        it('status 400: request body does not contain inc_votes key', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({ ink_vetos: 7 })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('No inc_votes property provided!');
+            });
+        });
+      });
+      describe('INVALID METHODS', () => {
+        it('status 405: responds with a message when sent a put, patch, post, or delete', () => {
+          const invalidMethods = ['put', 'get', 'post'];
+          const methodPromises = invalidMethods.map(method => {
+            return request(app)
+              [method]('/api/comments/1')
+              .expect(405)
+              .then(({ body: { msg } }) => {
+                expect(msg).to.equal('Method not allowed!');
+              });
+          });
+          return Promise.all(methodPromises);
         });
       });
     });
