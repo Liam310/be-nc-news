@@ -5,7 +5,8 @@ const {
 } = require('../models/articles');
 
 exports.sendArticleById = (req, res, next) => {
-  fetchArticleById(req.params)
+  const { article_id } = req.params;
+  fetchArticleById(article_id)
     .then(article => {
       res.status(200).send({ article });
     })
@@ -13,7 +14,9 @@ exports.sendArticleById = (req, res, next) => {
 };
 
 exports.updateArticle = (req, res, next) => {
-  modifyArticle(req.params, req.body)
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+  modifyArticle(article_id, inc_votes)
     .then(article => {
       res.status(200).send({ article });
     })
@@ -21,8 +24,10 @@ exports.updateArticle = (req, res, next) => {
 };
 
 exports.sendArticles = (req, res, next) => {
-  const { sort_by, order } = req.query;
-  fetchArticles(sort_by, order).then(articles => {
-    res.status(200).send({ articles });
-  });
+  const { sort_by, order, author, topic } = req.query;
+  fetchArticles(sort_by, order, author, topic)
+    .then(articles => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
 };
