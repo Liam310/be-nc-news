@@ -8,15 +8,16 @@ const {
   handle500s
 } = require('./errors/index');
 
+// Middleware
 app.use(express.json());
 
+// Controllers
 app.use('/api', apiRouter);
-
-app.use(handleCustomErrors);
-app.use(handlePsqlErrors);
-
 app.all('/*', handle404s);
 
+// Error handlers
+app.use(handleCustomErrors);
+app.use(handlePsqlErrors);
 app.use(handle500s);
 
 module.exports = app;

@@ -17,7 +17,7 @@ exports.fetchArticleById = article_id => {
     });
 };
 
-exports.modifyArticle = (article_id, inc_votes) => {
+exports.modifyArticle = (article_id, inc_votes = 0) => {
   return connection('articles')
     .where('articles.article_id', '=', article_id)
     .increment('votes', inc_votes)
@@ -27,11 +27,6 @@ exports.modifyArticle = (article_id, inc_votes) => {
         return Promise.reject({
           status: 404,
           msg: 'Non-existent id!'
-        });
-      } else if (!inc_votes) {
-        return Promise.reject({
-          status: 400,
-          msg: 'No inc_votes property provided!'
         });
       } else return article;
     });

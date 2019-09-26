@@ -12,6 +12,41 @@ beforeEach(() => connection.seed.run());
 after(() => connection.destroy());
 
 describe('/api', () => {
+  describe('GET', () => {
+    it('status 200: responds with a JSON describing all available endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body: { endpoints } }) => {
+          expect(endpoints).to.have.keys(
+            'GET /api',
+            'GET /api/topics',
+            'GET /api/articles',
+            'GET /api/articles/:article_id',
+            'PATCH /api/articles/:article_id',
+            'POST /api/articles/:article_id/comments',
+            'GET /api/articles/:article_id/comments',
+            'GET /api/users/:username',
+            'PATCH /api/comments/:comment_id',
+            'DELETE /api/comments/comment_id'
+          );
+        });
+    });
+  });
+  describe('INVALID METHODS', () => {
+    it('status 405: responds with a message when sent a put, patch, post, or delete', () => {
+      const invalidMethods = ['put', 'patch', 'post', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)
+          [method]('/api')
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).to.equal('Method not allowed!');
+          });
+      });
+      return Promise.all(methodPromises);
+    });
+  });
   it('status 404: sends "path not found" message when sent a request for non-existent path', () => {
     return request(app)
       .get('/flop')
@@ -246,6 +281,15 @@ describe('/api', () => {
               expect(article.votes).to.equal(109);
             });
         });
+        it('status 200: request body does not contain inc_votes key, respond with article info with votes number unchanged', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ ink_vetos: 7 })
+            .expect(200)
+            .then(({ body: { article } }) => {
+              expect(article.votes).to.equal(100);
+            });
+        });
         it('status 404: valid id, does not exist', () => {
           return request(app)
             .patch('/api/articles/29')
@@ -269,15 +313,6 @@ describe('/api', () => {
             .expect(400)
             .then(({ body: { msg } }) => {
               expect(msg).to.equal('Bad request!');
-            });
-        });
-        it('status 400: request body does not contain inc_votes key', () => {
-          return request(app)
-            .patch('/api/articles/1')
-            .send({ ink_vetos: 7 })
-            .expect(400)
-            .then(({ body: { msg } }) => {
-              expect(msg).to.equal('No inc_votes property provided!');
             });
         });
       });

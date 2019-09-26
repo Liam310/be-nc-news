@@ -18,10 +18,108 @@
           "title": "Seafood substitutions are increasing",
           "topic": "cooking",
           "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": 1527695953341
+          "created_at": 1527695953341,
+          "article_id": 18,
+          "votes": 4,
+          "comment_count": 1
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves up an article containing information on article matching article_id",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Barbara Streisand wins Grammy; thanks Mitch in speech",
+        "topic": "celebrity",
+        "author": "weegembump",
+        "body": "This is an article...",
+        "created_at": 1527695955691,
+        "article_id": 23,
+        "votes": 105,
+        "comment_count": 17
+      }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "increments the votes on an article by a given amount and serves up updated article",
+    "queries": [],
+    "exampleRequest": { "inc_votes": 1 },
+    "exampleResponse": {
+      "article": {
+        "title": "Barbara Streisand wins Grammy; thanks Mitch in speech",
+        "topic": "celebrity",
+        "author": "weegembump",
+        "body": "This is an article...",
+        "created_at": 1527695955691,
+        "article_id": 23,
+        "votes": 106,
+        "comment_count": 17
+      }
+    }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "creates a comment with body & username sent on the request and serves the posted comment",
+    "queries": [],
+    "exampleRequest": {
+      "username": "butter_bridge",
+      "body": "This Mitch guy really knows what's up."
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 5,
+        "votes": 0,
+        "created_at": 1527695955692,
+        "author": "butter_bridge",
+        "body": "This Mitch guy really knows what's up."
+      }
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves all comments posted on article matching article_id",
+    "queries": ["sort_by", "order"],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 5,
+          "votes": 0,
+          "created_at": 1527695955692,
+          "author": "butter_bridge",
+          "body": "This Mitch guy really knows what's up."
+        }
+      ]
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "serves an object of user data with matching username",
+    "queries": [],
+    "exampleResponse": {
+      "user": {
+        "username": "YeetyMcYeet",
+        "avatar_url": "https://i.kym-cdn.com/entries/icons/original/000/027/475/Screen_Shot_2018-10-25_at_11.02.15_AM.png",
+        "name": "Sara"
+      }
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "increments the votes on a comment by a given amount and serves up updated comment",
+    "queries": [],
+    "exampleRequest": {
+      "inc_votes": 4
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 5,
+        "votes": 4,
+        "created_at": 1527695955692,
+        "author": "butter_bridge",
+        "body": "This Mitch guy really knows what's up."
+      }
+    }
+  },
+  "DELETE /api/comments/comment_id": {
+    "description": "removes the comment matching comment_id and serves up no content",
+    "queries": []
   }
 }
