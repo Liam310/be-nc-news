@@ -69,17 +69,21 @@ describe('makeRefObj', () => {
     expect(makeRefObj([])).to.eql({});
   });
   it('return a reference object containing one key/value pair when passed an array of 1 object', () => {
-    const actual = makeRefObj([
-      {
-        article_id: 1,
-        title: 'Living in the shadow of a great man',
-        topic: 'mitch',
-        author: 'butter_bridge',
-        body: 'I find this existence challenging',
-        created_at: 1542284514171,
-        votes: 100
-      }
-    ]);
+    const actual = makeRefObj(
+      [
+        {
+          article_id: 1,
+          title: 'Living in the shadow of a great man',
+          topic: 'mitch',
+          author: 'butter_bridge',
+          body: 'I find this existence challenging',
+          created_at: 1542284514171,
+          votes: 100
+        }
+      ],
+      'title',
+      'article_id'
+    );
     expect(actual).to.eql({ 'Living in the shadow of a great man': 1 });
   });
   it('does not mutate original array', () => {
@@ -94,7 +98,7 @@ describe('makeRefObj', () => {
         votes: 100
       }
     ];
-    makeRefObj(input);
+    makeRefObj(input, 'title', 'article_id');
     expect(input).to.eql([
       {
         article_id: 1,
@@ -143,7 +147,7 @@ describe('makeRefObj', () => {
         created_at: 911564514171
       }
     ];
-    const actual = makeRefObj(input);
+    const actual = makeRefObj(input, 'title', 'article_id');
     const expected = {
       'Eight pug gifs that remind me of mitch': 1,
       'Student SUES Mitch!': 2,

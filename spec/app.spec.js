@@ -519,7 +519,7 @@ describe('/api', () => {
   });
   describe('/comments', () => {
     describe('/:comment_id', () => {
-      describe('PATCH', () => {
+      describe.only('PATCH', () => {
         it('status 200: responds with updated comment', () => {
           return request(app)
             .patch('/api/comments/1')
@@ -535,6 +535,15 @@ describe('/api', () => {
                 'votes'
               );
               expect(comment.votes).to.equal(19);
+            });
+        });
+        it('status 200: request body does not contain inc_votes key, respond with comment object with votes number unchanged', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({ ink_vetos: 7 })
+            .expect(200)
+            .then(({ body: { comment } }) => {
+              expect(comment.votes).to.equal(16);
             });
         });
         it('status 404: valid id, does not exist', () => {
@@ -560,15 +569,6 @@ describe('/api', () => {
             .expect(400)
             .then(({ body: { msg } }) => {
               expect(msg).to.equal('Bad request!');
-            });
-        });
-        it('status 400: request body does not contain inc_votes key', () => {
-          return request(app)
-            .patch('/api/comments/1')
-            .send({ ink_vetos: 7 })
-            .expect(400)
-            .then(({ body: { msg } }) => {
-              expect(msg).to.equal('No inc_votes property provided!');
             });
         });
       });

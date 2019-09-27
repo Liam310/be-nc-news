@@ -8,9 +8,9 @@ exports.formatDates = list => {
   return listCopy;
 };
 
-exports.makeRefObj = list => {
+exports.makeRefObj = (list, keyProperty, valueProperty) => {
   return list.reduce((referenceObj, currentObj) => {
-    referenceObj[currentObj.title] = currentObj.article_id;
+    referenceObj[currentObj[keyProperty]] = currentObj[valueProperty];
     return referenceObj;
   }, {});
 };
