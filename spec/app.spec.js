@@ -519,7 +519,7 @@ describe('/api', () => {
   });
   describe('/comments', () => {
     describe('/:comment_id', () => {
-      describe.only('PATCH', () => {
+      describe('PATCH', () => {
         it('status 200: responds with updated comment', () => {
           return request(app)
             .patch('/api/comments/1')

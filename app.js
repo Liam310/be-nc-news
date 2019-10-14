@@ -7,9 +7,11 @@ const {
   handle404s,
   handle500s
 } = require('./errors/index');
+const cors = require('cors');
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Controllers
 app.use('/api', apiRouter);
