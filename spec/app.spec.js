@@ -85,7 +85,33 @@ describe('/api', () => {
       });
     });
   });
-  describe('/users', () => {
+  describe.only('/users', () => {
+    describe('GET', () => {
+      it('status 200: sends an object containing an array of all the users', () => {
+        return request(app)
+          .get('/api/users')
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users).to.be.an('array');
+            expect(users.length).to.equal(4);
+            expect(users[0]).to.have.keys('username', 'avatar_url', 'name');
+          });
+      });
+    });
+    describe('INVALID METHODS', () => {
+      it('status 405: responds with a message when sent a put, patch, post, or delete', () => {
+        const invalidMethods = ['put', 'patch', 'post', 'delete'];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+            [method]('/api/users')
+            .expect(405)
+            .then(({ body: { msg } }) => {
+              expect(msg).to.equal('Method not allowed!');
+            });
+        });
+        return Promise.all(methodPromises);
+      });
+    });
     describe('/:username', () => {
       describe('GET', () => {
         it('status 200: sends back user info', () => {

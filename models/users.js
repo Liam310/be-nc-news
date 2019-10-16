@@ -10,3 +10,7 @@ exports.fetchUserByUsername = username => {
         : Promise.reject({ status: 404, msg: 'Not a valid username!' });
     });
 };
+
+exports.fetchUsers = () => {
+  return connection('users').select('*');
+};
