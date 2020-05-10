@@ -1,6 +1,7 @@
 const { DB_URL } = process.env;
 const ENV = process.env.NODE_ENV || 'development';
-const info = require('./info');
+// Only for linux users
+// const info = require('./info');
 
 const baseConfig = {
   client: 'pg',
@@ -15,14 +16,14 @@ const baseConfig = {
 const customConfig = {
   development: {
     connection: {
-      database: 'nc_news',
-      ...info
+      database: 'nc_news'
+      // ...info
     }
   },
   test: {
     connection: {
-      database: 'nc_news_test',
-      ...info
+      database: 'nc_news_test'
+      // ...info
     }
   },
   production: {
